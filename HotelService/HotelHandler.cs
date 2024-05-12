@@ -45,8 +45,8 @@ public class HotelHandler
     private SemaphoreSlim _dbWriteLock = new SemaphoreSlim(1, 1);
 
     /// <summary>
-    /// Default constructor of the order handler class
-    /// that handles data and prepares messages concerning saga orders beginning, end and failure
+    /// Default constructor of the hotel handler class
+    /// that handles data and prepares messages concerning saga hotel avaibility end booking
     /// </summary>
     /// <param name="requests"> Queue with the requests from the orchestrator </param>
     /// <param name="publish"> Queue with messages that need to be published to RabbitMQ </param>

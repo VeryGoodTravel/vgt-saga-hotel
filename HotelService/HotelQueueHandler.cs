@@ -23,7 +23,7 @@ namespace vgt_saga_hotel.HotelService;
 /// <list type="bullet">
 ///     <listheader><term>Queue names:</term></listheader>
 ///     <item><term>RABBIT_REPLIES</term> <description> - Queue of the replies sent back to the orchestrator.</description></item>
-///     <item><term>RABBIT_ORDER</term> <description> - Queue of the requests sent by the orchestrator to the order service.</description></item>
+///     <item><term>RABBIT_HOTEL</term> <description> - Queue of the requests sent by the orchestrator to the hotel service.</description></item>
 /// </list>
 /// </p>
 /// </summary>
@@ -135,9 +135,9 @@ public class HotelQueueHandler : IDisposable
             string.IsNullOrEmpty(config.GetValue<string?>("RABBIT_REPLIES"))
                 ? ThrowException<string>("RABBIT_REPLIES")
                 : config.GetValue<string?>("RABBIT_REPLIES")!,
-            string.IsNullOrEmpty(config.GetValue<string?>("RABBIT_PAYMENT"))
-                ? ThrowException<string>("RABBIT_PAYMENT")
-                : config.GetValue<string?>("RABBIT_PAYMENT")!,
+            string.IsNullOrEmpty(config.GetValue<string?>("RABBIT_HOTEL"))
+                ? ThrowException<string>("RABBIT_HOTEL")
+                : config.GetValue<string?>("RABBIT_HOTEL")!,
         };
 
         return result;
