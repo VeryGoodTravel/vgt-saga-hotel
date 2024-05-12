@@ -7,17 +7,6 @@ temporarily books hotels or fully books them depending on the SAGA transaction s
 
 Creates hotel information and available rooms with the data provided by the scrapper.
 
-## Data storage (PostgreSQL)
-
-Follows CQRS.
-
-Database consists of the 3 main tables:
- - HotelDb -> contains information about each hotel defined with the foreign key of room types offered by the hotel,
- - RoomDb -> contains definition of the room types offered by the hotel with their respectful amount available in the hotel,
- - Booking -> Defines booked hotel rooms. Specifies if the booking is temporary with the DateTime of the temporary booking and the time the booking takes place. Is assigned to a hotel and room type.
-
-![Database schema](DB_HOTEL.png)
-
 ## Repository
 
 This repository contains additional submodules containing shared libraries of the SAGA microservices implementations.
@@ -45,3 +34,15 @@ To update those submodules in the local branch run:
 ## Implementation documentation
 XML docs of the project available in the repository in the
 file [SagaHotelDocumentation.xml](SagaHotelDocumentation.xml)
+
+
+## Data storage (PostgreSQL)
+
+Follows CQRS.
+
+Database consists of the 3 main tables:
+ - HotelDb -> contains information about each hotel defined with the foreign key of room types offered by the hotel,
+ - RoomDb -> contains definition of the room types offered by the hotel with their respectful amount available in the hotel,
+ - Booking -> Defines booked hotel rooms. Specifies if the booking is temporary with the DateTime of the temporary booking and the time the booking takes place. Is assigned to a hotel and room type.
+
+![Database schema](DB_HOTEL.png)
