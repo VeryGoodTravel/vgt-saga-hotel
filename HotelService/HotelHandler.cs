@@ -76,7 +76,6 @@ public class HotelHandler
             {
                 SagaState.Begin => Task.Run(() => TempBookHotel(message), Token),
                 SagaState.PaymentAccept => Task.Run(() => BookHotel(message), Token),
-                SagaState.HotelFullRollback => Task.Run(() => FullRollback(message), Token),
                 SagaState.HotelTimedRollback => Task.Run(() => TempRollback(message), Token),
                 _ => null
             };
@@ -132,27 +131,6 @@ public class HotelHandler
     }
     
     private async Task BookHotel(Message message)
-    {
-        var rnd = new Random();
-        await Task.Delay(rnd.Next(0, 100), Token);
-        var result = rnd.Next(0, 1) switch
-        {
-            1 => SagaState.PaymentAccept,
-            _ => SagaState.PaymentFailed
-        };
-        
-        message.MessageType = MessageType.PaymentReply;
-        message.MessageId += 1;
-        message.State = result;
-        message.Body = new PaymentReply();
-        message.CreationDate = DateTime.Now;
-        
-        await Publish.Writer.WriteAsync(message, Token);
-        
-        _concurencySemaphore.Release();
-    }
-    
-    private async Task FullRollback(Message message)
     {
         var rnd = new Random();
         await Task.Delay(rnd.Next(0, 100), Token);
