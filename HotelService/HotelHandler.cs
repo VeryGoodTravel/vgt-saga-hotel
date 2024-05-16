@@ -131,6 +131,18 @@ public class HotelHandler
                 BookFrom = requestBody.BookFrom,
                 BookTo = requestBody.BookTo
             });
+            await transaction.CommitAsync(Token);
+            
+            message.MessageId += 1;
+            message.MessageType = MessageType.PaymentRequest;
+            message.State = SagaState.HotelTimedAccept;
+            message.Body = new PaymentRequest();
+            message.CreationDate = DateTime.Now;
+            
+            await Publish.Writer.WriteAsync(message, Token);
+        
+            _concurencySemaphore.Release();
+            return;
         }
         var temporary =
             booked.Where(p => p.Temporary == 1 
@@ -161,6 +173,8 @@ public class HotelHandler
             BookFrom = requestBody.BookFrom,
             BookTo = requestBody.BookTo
         });
+        await transaction.CommitAsync(Token);
+        
         message.MessageId += 1;
         message.MessageType = MessageType.PaymentRequest;
         message.State = SagaState.HotelTimedAccept;
@@ -174,6 +188,9 @@ public class HotelHandler
     
     private async Task TempRollback(Message message)
     {
+        if (message.MessageType != MessageType.HotelRequest || message.Body == null) return;
+        var requestBody = (HotelRequest)message.Body;
+        
         var rnd = new Random();
         await Task.Delay(rnd.Next(0, 100), Token);
         var result = rnd.Next(0, 1) switch

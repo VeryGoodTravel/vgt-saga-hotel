@@ -38,6 +38,9 @@
         <None Update="appsettings.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="hotels.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <Content Include="..\.dockerignore">
             <Link>.dockerignore</Link>
         </Content>
