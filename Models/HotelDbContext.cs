@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace vgt_saga_hotel.Models;
@@ -39,7 +40,7 @@ public class HotelDbContext : DbContext
 /// </summary>
 public class Booking()
 {
-    
+    [Key]
     public int BookingId { get; set; }
     
     /// <summary>
@@ -80,6 +81,7 @@ public class Booking()
 /// </summary>
 public class RoomDb()
 {
+    [Key]
     public int RoomDbId { get; set; }
     
     /// <summary>
@@ -90,6 +92,7 @@ public class RoomDb()
     /// <summary>
     /// Name of the room
     /// </summary>
+    [StringLength(200)]
     public string Name { get; set; } = string.Empty;
     /// <summary>
     /// Minimal amount of people required to rent this room
@@ -126,6 +129,8 @@ public class RoomDb()
     /// Maximal amount of children younger than 3 y.o. allowed to rent this room
     /// </summary>
     public int MaxLesserChildren { get; set; } = -1;
+    
+    public HotelDb Hotel { get; set; }
 };
 
 /// <summary>
@@ -137,22 +142,27 @@ public class HotelDb()
     /// <summary>
     /// Name of the hotel from scrapper
     /// </summary>
+    [StringLength(150)]
     public string Name { get; set; } = string.Empty;
     /// <summary>
     /// Country the hotel is in
     /// </summary>
+    [StringLength(50)]
     public string Country { get; set; } = string.Empty;
     /// <summary>
     /// City the hotel is assigned to
     /// </summary>
+    [StringLength(50)]
     public string City { get; set; } = string.Empty;
     /// <summary>
     /// Code of the airport assigned to the hotel
     /// </summary>
+    [StringLength(10)]
     public string AirportCode { get; set; } = string.Empty;
     /// <summary>
     /// Name of the airport assigned to the hotel
     /// </summary>
+    [StringLength(50)]
     public string AirportName { get; set; } = string.Empty;
 
     /// <summary>

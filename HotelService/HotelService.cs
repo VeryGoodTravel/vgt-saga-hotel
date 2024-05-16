@@ -56,11 +56,16 @@ public class HotelService : IDisposable
         _jsonUtils = new Utils(_logger);
         _payments = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
-        
+
         var connStr = SecretUtils.GetConnectionString(_config, "DB_NAME_HOTEL", _logger);
         var options = new DbContextOptions<HotelDbContext>();
         _writeDb = new HotelDbContext(options);
         _readDb = new HotelDbContext(options);
+
+        if (!_readDb.Hotels.Any())
+        {
+            CreateData().Wait(); 
+        }
         
         _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
@@ -72,6 +77,42 @@ public class HotelService : IDisposable
         _queues.AddRepliesConsumer(SagaOrdersEventHandler);
     }
 
+    private async Task CreateData()
+    {
+        using StreamReader reader = new("./hotels.json");
+        var json = await reader.ReadToEndAsync(Token);
+        List<Hotel> hotels = JsonConvert.DeserializeObject<List<Hotel>>(json) ?? [];
+        var rnd = new Random();
+        foreach (var hotel in hotels)
+        {
+            List<RoomDb> dbRooms = [];
+            dbRooms.AddRange(hotel.Rooms.Select(room => new RoomDb
+            {
+                Amount = rnd.Next(1, 5),
+                Name = room.Name,
+                MinPeople = room.People.Min,
+                MaxPeople = room.People.Max,
+                MaxAdults = room.Adults.Max,
+                MinAdults = room.Adults.Min,
+                MaxChildren = room.Children.Max,
+                MinChildren = room.Children.Min,
+                Max10yo = rnd.Next(0, room.Children.Max),
+                MaxLesserChildren = rnd.Next(0, room.Children.Max / 2)
+            }));
+            _writeDb.Rooms.AddRange(dbRooms);
+            _writeDb.Hotels.Add(new HotelDb
+            {
+                Name = hotel.Name,
+                Country = hotel.Country,
+                City = hotel.City,
+                AirportCode = hotel.Airport.Code,
+                AirportName = hotel.Airport.Name,
+                Rooms = dbRooms,
+            });
+        }
+        await _writeDb.SaveChangesAsync(Token);
+    }
+    
     private void Initialize()
     {
         JObject o1 = JObject.Parse(File.ReadAllText(@"c:\videogames.json"));
