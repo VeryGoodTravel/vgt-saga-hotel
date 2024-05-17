@@ -59,8 +59,8 @@ public class HotelService : IDisposable
 
         var connStr = SecretUtils.GetConnectionString(_config, "DB_NAME_HOTEL", _logger);
         var options = new DbContextOptions<HotelDbContext>();
-        _writeDb = new HotelDbContext(options);
-        _readDb = new HotelDbContext(options);
+        _writeDb = new HotelDbContext(options, connStr);
+        _readDb = new HotelDbContext(options, connStr);
 
         if (!_readDb.Hotels.Any())
         {

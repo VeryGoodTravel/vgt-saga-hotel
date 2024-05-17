@@ -70,23 +70,28 @@ namespace vgt_saga_hotel.Migrations
 
                     b.Property<string>("AirportCode")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("AirportName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Country")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.HasKey("HotelDbId");
 
@@ -104,7 +109,7 @@ namespace vgt_saga_hotel.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("HotelDbId")
+                    b.Property<int>("HotelDbId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Max10yo")
@@ -133,7 +138,8 @@ namespace vgt_saga_hotel.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("RoomDbId");
 
@@ -163,9 +169,13 @@ namespace vgt_saga_hotel.Migrations
 
             modelBuilder.Entity("vgt_saga_hotel.Models.RoomDb", b =>
                 {
-                    b.HasOne("vgt_saga_hotel.Models.HotelDb", null)
+                    b.HasOne("vgt_saga_hotel.Models.HotelDb", "Hotel")
                         .WithMany("Rooms")
-                        .HasForeignKey("HotelDbId");
+                        .HasForeignKey("HotelDbId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hotel");
                 });
 
             modelBuilder.Entity("vgt_saga_hotel.Models.HotelDb", b =>

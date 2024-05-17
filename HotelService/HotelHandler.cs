@@ -4,6 +4,7 @@ using NLog;
 using vgt_saga_hotel.Models;
 using vgt_saga_serialization;
 using vgt_saga_serialization.MessageBodies;
+using HotelRequest = vgt_saga_serialization.MessageBodies.HotelRequest;
 
 namespace vgt_saga_hotel.HotelService;
 
@@ -106,6 +107,7 @@ public class HotelHandler
             message.Body = new PaymentRequest();
             
             await Publish.Writer.WriteAsync(message, Token);
+            _dbWriteLock.Release();
             _concurencySemaphore.Release();
             return;
         }
@@ -131,8 +133,9 @@ public class HotelHandler
                 BookFrom = requestBody.BookFrom,
                 BookTo = requestBody.BookTo
             });
+            await _readDb.SaveChangesAsync(Token);
             await transaction.CommitAsync(Token);
-            
+
             message.MessageId += 1;
             message.MessageType = MessageType.PaymentRequest;
             message.State = SagaState.HotelTimedAccept;
@@ -140,7 +143,7 @@ public class HotelHandler
             message.CreationDate = DateTime.Now;
             
             await Publish.Writer.WriteAsync(message, Token);
-        
+            _dbWriteLock.Release();
             _concurencySemaphore.Release();
             return;
         }
@@ -158,6 +161,7 @@ public class HotelHandler
             message.CreationDate = DateTime.Now;
             
             await Publish.Writer.WriteAsync(message, Token);
+            _dbWriteLock.Release();
             _concurencySemaphore.Release();
             return;
         }
@@ -173,6 +177,7 @@ public class HotelHandler
             BookFrom = requestBody.BookFrom,
             BookTo = requestBody.BookTo
         });
+        await _readDb.SaveChangesAsync(Token);
         await transaction.CommitAsync(Token);
         
         message.MessageId += 1;
@@ -182,7 +187,7 @@ public class HotelHandler
         message.CreationDate = DateTime.Now;
             
         await Publish.Writer.WriteAsync(message, Token);
-        
+        _dbWriteLock.Release();
         _concurencySemaphore.Release();
     }
     
@@ -191,43 +196,71 @@ public class HotelHandler
         if (message.MessageType != MessageType.HotelRequest || message.Body == null) return;
         var requestBody = (HotelRequest)message.Body;
         
-        var rnd = new Random();
-        await Task.Delay(rnd.Next(0, 100), Token);
-        var result = rnd.Next(0, 1) switch
+        await _dbReadLock.WaitAsync(Token);
+        await using var transaction = await _readDb.Database.BeginTransactionAsync(Token);
+
+        var booked = _readDb.Bookings
+            .Where(p => p.TransactionId == message.TransactionId);
+
+        if (booked.Any())
         {
-            1 => SagaState.PaymentAccept,
-            _ => SagaState.PaymentFailed
-        };
+            await booked.ExecuteDeleteAsync(Token);
+        }
+        await _readDb.SaveChangesAsync(Token);
+        await transaction.CommitAsync(Token);
         
-        message.MessageType = MessageType.PaymentReply;
+        message.MessageType = MessageType.OrderReply;
         message.MessageId += 1;
-        message.State = result;
-        message.Body = new PaymentReply();
+        message.State = SagaState.HotelTimedRollback;
+        message.Body = new HotelReply();
         message.CreationDate = DateTime.Now;
         
         await Publish.Writer.WriteAsync(message, Token);
-        
+        _dbReadLock.Release();
         _concurencySemaphore.Release();
     }
     
     private async Task BookHotel(Message message)
     {
-        var rnd = new Random();
-        await Task.Delay(rnd.Next(0, 100), Token);
-        var result = rnd.Next(0, 1) switch
-        {
-            1 => SagaState.PaymentAccept,
-            _ => SagaState.PaymentFailed
-        };
+        if (message.MessageType != MessageType.HotelRequest || message.Body == null) return;
+        var requestBody = (HotelRequest)message.Body;
         
-        message.MessageType = MessageType.PaymentReply;
+        await _dbReadLock.WaitAsync(Token);
+        await using var transaction = await _readDb.Database.BeginTransactionAsync(Token);
+
+        var booked = _readDb.Bookings
+            .Where(p => p.TransactionId == message.TransactionId);
+
+        if (booked.Any())
+        {
+            var booking = booked.FirstOrDefault();
+            if (booking != null)
+            {
+                booking.Temporary = 0;
+                await _readDb.SaveChangesAsync(Token);
+                await transaction.CommitAsync(Token);
+                
+                message.MessageType = MessageType.OrderReply;
+                message.MessageId += 1;
+                message.State = SagaState.HotelFullAccept;
+                message.Body = new HotelReply();
+                message.CreationDate = DateTime.Now;
+        
+                await Publish.Writer.WriteAsync(message, Token);
+                _dbReadLock.Release();
+                _concurencySemaphore.Release();
+            }
+        }
+        await transaction.RollbackAsync(Token);
+        
+        message.MessageType = MessageType.OrderReply;
         message.MessageId += 1;
-        message.State = result;
-        message.Body = new PaymentReply();
+        message.State = SagaState.HotelFullFail;
+        message.Body = new HotelReply();
         message.CreationDate = DateTime.Now;
         
         await Publish.Writer.WriteAsync(message, Token);
-        
+        _dbReadLock.Release();
         _concurencySemaphore.Release();
     }
 }

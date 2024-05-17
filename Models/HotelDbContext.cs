@@ -1,12 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace vgt_saga_hotel.Models;
 
 /// <inheritdoc />
 public class HotelDbContext : DbContext
 {
-    private string _connectionString;
+    private string _connectionString = "";
     
     /// <summary>
     /// Set of Database Hotel entities mapped to HotelDb objects
@@ -26,13 +27,27 @@ public class HotelDbContext : DbContext
         : base(options)
     {
     }
+    
+    /// <inheritdoc />
+    public HotelDbContext(DbContextOptions<HotelDbContext> options, string conn)
+        : base(options)
+    {
+        _connectionString = conn;
+    }
     // {
     //     _connectionString = connectionString;
     // }
     //
-    // /// <inheritdoc />
-    // protected override void OnConfiguring(DbContextOptionsBuilder options)
-    //     => options.UseNpgsql(_connectionString);
+    /// <inheritdoc />
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    {
+        if (!_connectionString.IsNullOrEmpty())
+        {
+            options.UseNpgsql(_connectionString);
+        }
+        
+        base.OnConfiguring(options);
+    }
 }
 
 /// <summary>
