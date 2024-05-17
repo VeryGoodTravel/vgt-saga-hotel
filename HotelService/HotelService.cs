@@ -97,7 +97,8 @@ public class HotelService : IDisposable
                 MaxChildren = room.Children.Max,
                 MinChildren = room.Children.Min,
                 Max10yo = rnd.Next(0, room.Children.Max),
-                MaxLesserChildren = rnd.Next(0, room.Children.Max / 2)
+                MaxLesserChildren = rnd.Next(0, room.Children.Max / 2),
+                Price = rnd.Next(100, 400)
             }));
             _writeDb.Rooms.AddRange(dbRooms);
             _writeDb.Hotels.Add(new HotelDb

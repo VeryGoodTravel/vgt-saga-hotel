@@ -99,6 +99,8 @@ public class RoomDb()
     [Key]
     public int RoomDbId { get; set; }
     
+    public int Price { get; set; }
+    
     /// <summary>
     /// Amount of the rooms offered by the hotel
     /// </summary>

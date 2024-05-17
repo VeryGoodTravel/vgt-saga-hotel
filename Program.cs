@@ -130,7 +130,7 @@ app.MapGet("/hotels", (HotelsRequest request) =>
         foreach (var roomDb in Dbhotels)
         {
             List<RoomHttp> rooms = [];
-            rooms.AddRange(roomDb.Value.Select(room => new RoomHttp { RoomId = room.RoomDbId.ToString(), Name = room.Name, Price = 0 }));
+            rooms.AddRange(roomDb.Value.Select(room => new RoomHttp { RoomId = room.RoomDbId.ToString(), Name = room.Name, Price = room.Price }));
             hotels.Add(new HotelHttp
             {
                 HotelId = roomDb.Key.HotelDbId.ToString(),
@@ -158,7 +158,7 @@ app.MapGet("/hotel", (HotelRequest request) =>
         if (dbHotel == null) return "";
 
         List<RoomHttp> rooms = [];
-        rooms.AddRange(dbHotel.Rooms.Select(room => new RoomHttp { RoomId = room.RoomDbId.ToString(), Name = room.Name, Price = 0 }));
+        rooms.AddRange(dbHotel.Rooms.Select(room => new RoomHttp { RoomId = room.RoomDbId.ToString(), Name = room.Name, Price = room.Price }));
 
         var hotel = new HotelHttp
         {
