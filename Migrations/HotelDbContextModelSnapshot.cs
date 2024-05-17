@@ -141,6 +141,9 @@ namespace vgt_saga_hotel.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<int>("Price")
+                        .HasColumnType("integer");
+
                     b.HasKey("RoomDbId");
 
                     b.HasIndex("HotelDbId");
