@@ -18,11 +18,11 @@ namespace vgt_saga_hotel.Migrations
                 {
                     HotelDbId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Country = table.Column<string>(type: "text", nullable: false),
-                    City = table.Column<string>(type: "text", nullable: false),
-                    AirportCode = table.Column<string>(type: "text", nullable: false),
-                    AirportName = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Country = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    City = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    AirportCode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    AirportName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,8 +35,9 @@ namespace vgt_saga_hotel.Migrations
                 {
                     RoomDbId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Price = table.Column<int>(type: "integer", nullable: false),
                     Amount = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     MinPeople = table.Column<int>(type: "integer", nullable: false),
                     MaxPeople = table.Column<int>(type: "integer", nullable: false),
                     MinAdults = table.Column<int>(type: "integer", nullable: false),
@@ -45,7 +46,7 @@ namespace vgt_saga_hotel.Migrations
                     MaxChildren = table.Column<int>(type: "integer", nullable: false),
                     Max10yo = table.Column<int>(type: "integer", nullable: false),
                     MaxLesserChildren = table.Column<int>(type: "integer", nullable: false),
-                    HotelDbId = table.Column<int>(type: "integer", nullable: true)
+                    HotelDbId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,7 +55,8 @@ namespace vgt_saga_hotel.Migrations
                         name: "FK_Rooms_Hotels_HotelDbId",
                         column: x => x.HotelDbId,
                         principalTable: "Hotels",
-                        principalColumn: "HotelDbId");
+                        principalColumn: "HotelDbId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

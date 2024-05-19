@@ -164,30 +164,6 @@
         <member name="M:vgt_saga_hotel.HotelService.HotelService.Dispose">
             <inheritdoc/>
         </member>
-        <member name="T:vgt_saga_hotel.Migrations.Initial">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_hotel.Migrations.Initial.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_hotel.Migrations.Initial.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_hotel.Migrations.Initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="T:vgt_saga_hotel.Migrations.ServiceUpdate">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_hotel.Migrations.ServiceUpdate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_hotel.Migrations.ServiceUpdate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:vgt_saga_hotel.Migrations.ServiceUpdate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
-        </member>
         <member name="T:vgt_saga_hotel.Models.HotelDbContext">
             <inheritdoc />
         </member>
@@ -707,6 +683,16 @@
             It is sent to all instances of the backend
             </summary>
         </member>
+        <member name="P:vgt_saga_serialization.MessageBodies.BackendReply.TransactionId">
+            <summary>
+            Guid of the SAGA transaction
+            </summary>
+        </member>
+        <member name="P:vgt_saga_serialization.MessageBodies.BackendReply.OfferId">
+            <summary>
+            ID of the offer as specified by the backend
+            </summary>
+        </member>
         <member name="T:vgt_saga_serialization.MessageBodies.BackendRequest">
             <summary>
             request from the backend 
@@ -783,6 +769,11 @@
             date the return flight takes place
             </summary>
         </member>
+        <member name="P:vgt_saga_serialization.MessageBodies.FlightRequest.TemporaryDateTime">
+            <summary>
+            What datetime the temporary request was executed
+            </summary>
+        </member>
         <member name="P:vgt_saga_serialization.MessageBodies.FlightRequest.PassangerCount">
             <summary>
             amount of the passengers to take
@@ -791,11 +782,6 @@
         <member name="P:vgt_saga_serialization.MessageBodies.FlightRequest.FlightId">
             <summary>
             Flight ID to book on full book
-            </summary>
-        </member>
-        <member name="P:vgt_saga_serialization.MessageBodies.FlightRequest.SeatNr">
-            <summary>
-            Seats on the flight to fully book
             </summary>
         </member>
         <member name="T:vgt_saga_serialization.MessageBodies.HotelReply">
@@ -850,6 +836,26 @@
         <member name="P:vgt_saga_serialization.MessageBodies.HotelRequest.TemporaryDateTime">
             <summary>
             What datetime the temporary request was executed
+            </summary>
+        </member>
+        <member name="P:vgt_saga_serialization.MessageBodies.HotelRequest.AdultCount">
+            <summary>
+            How many adults in the booking request
+            </summary>
+        </member>
+        <member name="P:vgt_saga_serialization.MessageBodies.HotelRequest.OldChildren">
+            <summary>
+            How many children under 18yo in the booking request
+            </summary>
+        </member>
+        <member name="P:vgt_saga_serialization.MessageBodies.HotelRequest.MidChildren">
+            <summary>
+            How many children under 10yo in the booking request
+            </summary>
+        </member>
+        <member name="P:vgt_saga_serialization.MessageBodies.HotelRequest.LesserChildren">
+            <summary>
+            How many children under 3yo in the booking request
             </summary>
         </member>
         <member name="T:vgt_saga_serialization.MessageBodies.OrderReply">

@@ -55,4 +55,8 @@
         <_ContentIncludedByDefault Remove="vgt-saga-hotel\Properties\launchSettings.json"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
 </Project>
