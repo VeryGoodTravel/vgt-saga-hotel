@@ -130,8 +130,8 @@ public class HotelHandler
                 TransactionId = message.TransactionId,
                 Temporary = 1,
                 TemporaryDt = DateTime.Now,
-                BookFrom = requestBody.BookFrom,
-                BookTo = requestBody.BookTo
+                BookFrom = requestBody.BookFrom.Value,
+                BookTo = requestBody.BookTo.Value
             });
             await _readDb.SaveChangesAsync(Token);
             await transaction.CommitAsync(Token);
@@ -174,8 +174,8 @@ public class HotelHandler
             TransactionId = message.TransactionId,
             Temporary = 1,
             TemporaryDt = DateTime.Now,
-            BookFrom = requestBody.BookFrom,
-            BookTo = requestBody.BookTo
+            BookFrom = requestBody.BookFrom.Value,
+            BookTo = requestBody.BookTo.Value
         });
         await _readDb.SaveChangesAsync(Token);
         await transaction.CommitAsync(Token);
