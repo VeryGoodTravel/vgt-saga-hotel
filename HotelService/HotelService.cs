@@ -98,10 +98,10 @@ public class HotelService : IDisposable
                 MinChildren = room.Children.Min,
                 Max10yo = rnd.Next(0, room.Children.Max),
                 MaxLesserChildren = rnd.Next(0, room.Children.Max / 2),
-                Price = rnd.Next(100, 400)
+                Price = rnd.Next(100, 400),
             }));
             _writeDb.Rooms.AddRange(dbRooms);
-            _writeDb.Hotels.Add(new HotelDb
+            var h = new HotelDb
             {
                 Name = hotel.Name,
                 Country = hotel.Country,
@@ -109,7 +109,12 @@ public class HotelService : IDisposable
                 AirportCode = hotel.Airport.Code,
                 AirportName = hotel.Airport.Name,
                 Rooms = dbRooms,
-            });
+            };
+            _writeDb.Hotels.Add(h);
+            foreach (var room in dbRooms)
+            {
+                room.Hotel = h;
+            }
         }
         await _writeDb.SaveChangesAsync(Token);
     }
