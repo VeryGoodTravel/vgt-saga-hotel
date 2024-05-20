@@ -164,6 +164,18 @@
         <member name="M:vgt_saga_hotel.HotelService.HotelService.Dispose">
             <inheritdoc/>
         </member>
+        <member name="T:vgt_saga_hotel.Migrations.Initial">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_hotel.Migrations.Initial.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_hotel.Migrations.Initial.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:vgt_saga_hotel.Migrations.Initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:vgt_saga_hotel.Models.HotelDbContext">
             <inheritdoc />
         </member>

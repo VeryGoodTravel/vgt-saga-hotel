@@ -155,6 +155,7 @@ public class RoomDb()
 /// </summary>
 public class HotelDb()
 {
+    [Key]
     public int HotelDbId { get; set; }
     /// <summary>
     /// Name of the hotel from scrapper
