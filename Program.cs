@@ -65,6 +65,7 @@ await using var scope = app.Services.CreateAsyncScope();
     await using var db = scope.ServiceProvider.GetService<HotelDbContext>();
     {
         logger.Info("CAN CONNECT {v}" ,db.Database.CanConnect());
+        db.Database.EnsureDeleted();
         await db.Database.MigrateAsync();
     }
 }
