@@ -61,8 +61,9 @@ public class HotelService : IDisposable
         var options = new DbContextOptions<HotelDbContext>();
         _writeDb = new HotelDbContext(options, connStr);
         _readDb = new HotelDbContext(options, connStr);
-
-        if (!_readDb.Hotels.Any())
+        
+        if (!(from item in _readDb.Hotels
+                select item).Any())
         {
             CreateData().Wait(); 
         }
