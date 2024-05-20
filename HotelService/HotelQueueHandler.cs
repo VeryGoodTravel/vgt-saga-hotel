@@ -74,10 +74,18 @@ public class HotelQueueHandler : IDisposable
         _queueNames = GetQueuesFromConfig(config);
 
         _sagaToOrchestrator = _connection.CreateModel();
-        _sagaToOrchestrator.QueueDeclare(_queueNames[0]);
+        _sagaToOrchestrator.QueueDeclare(_queueNames[0],
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: new Dictionary<string, object>());
 
         _sagaFromOrchestrator = _connection.CreateModel();
-        _sagaFromOrchestrator.QueueDeclare(_queueNames[1]);
+        _sagaFromOrchestrator.QueueDeclare(_queueNames[1],
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: new Dictionary<string, object>());
 
         _logger.Debug("{p}Initialized RabbitMq queues", LoggerPrefix);
         _logger.Info("{p}Initialized RabbitMq", LoggerPrefix);
@@ -174,7 +182,7 @@ public class HotelQueueHandler : IDisposable
             Password = pass,
             VirtualHost = virtHost,
             RequestedHeartbeat = TimeSpan.FromSeconds(60),
-            RequestedConnectionTimeout = TimeSpan.FromSeconds(6000)
+            RequestedConnectionTimeout = TimeSpan.FromSeconds(6000),
         };
     }
 

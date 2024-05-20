@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Extensions.Logging;
@@ -91,7 +92,7 @@ catch (ArgumentException)
 }
 
 
-app.MapGet("/hotels", (HotelsRequest request) =>
+app.MapGet("/hotels", ([FromBody]HotelsRequest request) =>
     {
         using var scope = app.Services.CreateAsyncScope();
         using var db = scope.ServiceProvider.GetService<HotelDbContext>();
@@ -148,7 +149,7 @@ app.MapGet("/hotels", (HotelsRequest request) =>
     .WithName("Hotels")
     .WithOpenApi();
 
-app.MapGet("/hotel", (HotelRequest request) =>
+app.MapGet("/hotel", ([FromBody]HotelRequest request) =>
     {
         using var scope = app.Services.CreateAsyncScope();
         using var db = scope.ServiceProvider.GetService<HotelDbContext>();
