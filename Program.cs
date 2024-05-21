@@ -200,7 +200,7 @@ app.MapGet("/locations", () =>
 
         var travels = new List<TravelLocation>();
 
-        foreach (var location in locations)
+        foreach (var location in locations.Distinct())
         {
             var cities = location.Value.Select(city => new TravelLocation { Id = city, Label = city, }).ToArray();
             travels.Add(new TravelLocation
@@ -212,7 +212,7 @@ app.MapGet("/locations", () =>
         }
         
         
-        return JsonConvert.SerializeObject(travels);
+        return JsonConvert.SerializeObject(travels.Distinct());
     })
     .WithName("Locations")
     .WithOpenApi();
