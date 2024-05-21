@@ -207,7 +207,7 @@ app.MapGet("/locations", () =>
             {
                 Id = location.Key,
                 Label = location.Key,
-                Locations = cities
+                Locations = cities.Distinct().ToArray()
             });
         }
         
