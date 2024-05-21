@@ -23,12 +23,12 @@ public class TravelDateRange : Dictionary<string, string>
 
     public  DateTime EndDt()
     {
-        return DateTime.Parse(End);
+        return DateTime.Parse(End).ToUniversalTime();
     }
     
     public  DateTime StartDt()
     {
-        return DateTime.Parse(Start);
+        return DateTime.Parse(Start).ToUniversalTime();
     }
 
     public static TravelDateRange GetExample()
