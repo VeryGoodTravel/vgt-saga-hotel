@@ -68,6 +68,7 @@ public class HotelQueueHandler : IDisposable
             {
                 _logger.Error("{p}Couldn't connect to the RabbitMq server, trying again. Check connection string and/or connection {e}",
                     LoggerPrefix, e);
+                Task.Delay(100).Wait();
             }
         }
         
