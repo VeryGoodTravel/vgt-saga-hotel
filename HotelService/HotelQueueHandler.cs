@@ -57,17 +57,20 @@ public class HotelQueueHandler : IDisposable
     {
         _logger = log;
         _logger.Debug("{p}Initializing RabbitMq connections", LoggerPrefix);
-        try
+        while (_connection is not { IsOpen: true })
         {
-            _factory = GetConnectionFactoryFromConfig(config);
-            _connection = _factory.CreateConnection();
+            try
+            {
+                _factory = GetConnectionFactoryFromConfig(config);
+                _connection = _factory.CreateConnection();
+            }
+            catch (BrokerUnreachableException e)
+            {
+                _logger.Error("{p}Couldn't connect to the RabbitMq server, trying again. Check connection string and/or connection {e}",
+                    LoggerPrefix, e);
+            }
         }
-        catch (BrokerUnreachableException e)
-        {
-            _logger.Error("{p}Couldn't connect to the RabbitMq server. Check connection string and/or connection {e}",
-                LoggerPrefix, e);
-            throw;
-        }
+        
 
         _logger.Debug("{p}Connected to the RabbitMq server", LoggerPrefix);
 
