@@ -353,6 +353,11 @@
             Describes travel date range.
             </summary>
         </member>
+        <member name="M:vgt_saga_hotel.Models.TravelDateRange.#ctor">
+            <summary>
+            Describes travel date range.
+            </summary>
+        </member>
         <member name="T:vgt_saga_hotel.Models.TravelLocation">
             <summary>
             Describes travel location, both origins and destinations.

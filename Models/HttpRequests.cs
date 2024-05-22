@@ -5,7 +5,7 @@ namespace vgt_saga_hotel.Models;
 /// <summary>
 /// Describes travel date range.
 /// </summary>
-public class TravelDateRange : Dictionary<string, string>
+public class TravelDateRange() : Dictionary<string, string>
 {
     [JsonProperty("end")]
     public string End
@@ -41,7 +41,7 @@ public class TravelDateRange : Dictionary<string, string>
     }
 }
 
-public class HotelsRequest
+public class HotelsRequest()
 {
     [JsonProperty("dates")]
     public TravelDateRange Dates { get; set; }
@@ -54,7 +54,7 @@ public class HotelsRequest
     public Dictionary<int, int> Participants { get; set; }
 }
 
-public class HotelRequest
+public class HotelRequest()
 {
     [JsonProperty("hotel_id")]
     public string HotelId { get; set; }

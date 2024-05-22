@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Extensions.Logging;
@@ -97,6 +98,7 @@ app.MapGet("/hotels", ([FromBody]HotelsRequest request) =>
         using var scope = app.Services.CreateAsyncScope();
         using var db = scope.ServiceProvider.GetService<HotelDbContext>();
 
+        logger.Info("Cities: {room}",  request.Cities);
 
         var dbRooms = from rooms in db.Rooms
             where rooms.MaxAdults >= request.Participants[4]
@@ -105,19 +107,22 @@ app.MapGet("/hotels", ([FromBody]HotelsRequest request) =>
                   && rooms.MinChildren <= request.Participants[3]
                   && rooms.Max10yo >= request.Participants[2]
                   && rooms.MaxLesserChildren >= request.Participants[1]
-                  && request.Cities.Contains(rooms.Hotel.City)
-                  && request.Cities.Contains(rooms.Hotel.City)
-            join booking in db.Bookings on rooms equals booking.Room 
-            where booking.BookFrom > request.Dates.EndDt()
-                && booking.BookTo > request.Dates.StartDt()
-            group booking by rooms into g
-            where g.Count() < g.Key.Amount
-            select g.Key;
+                  && (request.Cities.Any(p => p.Equals(rooms.Hotel.City)))
+                  && (from m in db.Bookings 
+                      where m.BookFrom > request.Dates.EndDt()
+                            && m.BookTo > request.Dates.StartDt()
+                            && m.Room == rooms select m).Count() < rooms.Amount
+            select rooms;
+            
 
         var Dbhotels = new Dictionary<HotelDb, List<RoomDb>>();
 
-        foreach (var room in dbRooms)
+        var results = dbRooms.ToList();
+        logger.Info("Found rooms: {room}",  results.Count);
+
+        foreach (var room in results)
         {
+            if (room == null || room.Hotel == null) continue;
             if (Dbhotels.TryGetValue(room.Hotel, out var roms))
             {
                 roms.Add(room);
