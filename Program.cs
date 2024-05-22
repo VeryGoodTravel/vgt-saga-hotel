@@ -93,7 +93,7 @@ catch (ArgumentException)
 }
 
 
-app.MapGet("/hotels", ([FromBody]HotelsRequest request) =>
+app.MapPost("/hotels", ([FromBody]HotelsRequest request) =>
     {
         using var scope = app.Services.CreateAsyncScope();
         using var db = scope.ServiceProvider.GetService<HotelDbContext>();
@@ -117,44 +117,37 @@ app.MapGet("/hotels", ([FromBody]HotelsRequest request) =>
 
         var Dbhotels = new Dictionary<HotelDb, List<RoomDb>>();
 
-        var results = dbRooms.ToList();
+        var results = dbRooms.Include(p => p.Hotel).AsSplitQuery().AsNoTracking().Distinct().ToList();
         logger.Info("Found rooms: {room}",  results.Count);
-
-        foreach (var room in results)
-        {
-            if (room == null || room.Hotel == null) continue;
-            if (Dbhotels.TryGetValue(room.Hotel, out var roms))
-            {
-                roms.Add(room);
-            }
-            else
-            {
-                Dbhotels[room.Hotel] = [room];
-            }
-            
-        }
-
+        
+        var hotelIds = results.Select(p => p.Hotel.HotelDbId).Distinct().ToList();
+        
+        logger.Info("hotel ids: {room}",  hotelIds.Count);
+        
         var hotels = new List<HotelHttp>();
-        foreach (var roomDb in Dbhotels)
+        foreach (var hotelId in hotelIds)
         {
             List<RoomHttp> rooms = [];
-            rooms.AddRange(roomDb.Value.Select(room => new RoomHttp { RoomId = room.RoomDbId.ToString(), Name = room.Name, Price = room.Price }));
+            rooms.AddRange(results.Where(p => p.Hotel.HotelDbId == hotelId).Select(room => new RoomHttp { RoomId = room.RoomDbId.ToString(), Name = room.Name, Price = room.Price }).ToList());
+            var hot = results.First(p => p.Hotel.HotelDbId == hotelId).Hotel;
             hotels.Add(new HotelHttp
             {
-                HotelId = roomDb.Key.HotelDbId.ToString(),
-                Name = roomDb.Key.Name,
-                City = roomDb.Key.City,
-                Country = roomDb.Key.Country,
+                HotelId = hotelId.ToString(),
+                Name = hot.Name,
+                City = hot.City,
+                Country = hot.Country,
                 Rooms = rooms
             });
         }
+        
+        logger.Info("final hotels: {room}",  hotels.Count);
 
-        return JsonConvert.SerializeObject(hotels);
+        return hotels;
     })
     .WithName("Hotels")
     .WithOpenApi();
 
-app.MapGet("/hotel", ([FromBody]HotelRequest request) =>
+app.MapPost("/hotel", handler: ([FromBody]HotelRequest request) =>
     {
         using var scope = app.Services.CreateAsyncScope();
         using var db = scope.ServiceProvider.GetService<HotelDbContext>();
@@ -163,12 +156,12 @@ app.MapGet("/hotel", ([FromBody]HotelRequest request) =>
         
         var dbHotel = db.Hotels.Include(p => p.Rooms).FirstOrDefault(p => id == p.HotelDbId);
 
-        if (dbHotel == null) return "";
+        if (dbHotel == null) return null;
 
         List<RoomHttp> rooms = [];
         rooms.AddRange(dbHotel.Rooms.Select(room => new RoomHttp { RoomId = room.RoomDbId.ToString(), Name = room.Name, Price = room.Price }));
 
-        var hotel = new HotelHttp
+        HotelHttp hotel = new()
         {
             HotelId = dbHotel.HotelDbId.ToString(),
             Name = dbHotel.Name,
@@ -176,7 +169,8 @@ app.MapGet("/hotel", ([FromBody]HotelRequest request) =>
             Country = dbHotel.Country,
             Rooms = rooms
         };
-        return JsonConvert.SerializeObject(hotel);
+        
+        return hotel;
     })
     .WithName("Hotel")
     .WithOpenApi();
