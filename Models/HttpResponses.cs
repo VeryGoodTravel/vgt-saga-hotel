@@ -28,6 +28,9 @@ public class HotelHttp
     [JsonProperty("country")]
     public string Country { get; set; }
     
+    [JsonProperty("airport_code")]
+    public string AirportCode { get; set; }
+    
     [JsonProperty("rooms")]
     public List<RoomHttp> Rooms { get; set; }
 }

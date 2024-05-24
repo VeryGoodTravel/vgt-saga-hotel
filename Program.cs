@@ -136,6 +136,7 @@ app.MapPost("/hotels", ([FromBody]HotelsRequest request) =>
                 Name = hot.Name,
                 City = hot.City,
                 Country = hot.Country,
+                AirportCode = hot.AirportCode,
                 Rooms = rooms
             });
         }
