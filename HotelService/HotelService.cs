@@ -119,18 +119,6 @@ public class HotelService : IDisposable
         }
         await _writeDb.SaveChangesAsync(Token);
     }
-    
-    private void Initialize()
-    {
-        JObject o1 = JObject.Parse(File.ReadAllText(@"c:\videogames.json"));
-
-        // read JSON directly from a file
-        using (StreamReader file = File.OpenText(@"c:\videogames.json"))
-        using (JsonTextReader reader = new JsonTextReader(file))
-        {
-            JObject o2 = (JObject) JToken.ReadFrom(reader);
-        }
-    }
 
     /// <summary>
     /// Publishes made messages to the right queues
