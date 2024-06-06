@@ -31,6 +31,7 @@ public class HotelService : IDisposable
 
     private readonly HotelDbContext _writeDb;
     private readonly HotelDbContext _readDb;
+    private Task Publisher { get; set; }
     
     /// <summary>
     /// Allows tasks cancellation from the outside of the class
@@ -70,6 +71,7 @@ public class HotelService : IDisposable
         
         _publish = Channel.CreateUnbounded<Message>(new UnboundedChannelOptions()
             { SingleReader = true, SingleWriter = true, AllowSynchronousContinuations = true });
+        Publisher = Task.Run(() => RabbitPublisher());
         
         _hotelHandler = new HotelHandler(_payments, _publish, _writeDb, _readDb, _logger);
 
