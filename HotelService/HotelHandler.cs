@@ -193,9 +193,6 @@ public class HotelHandler
     
     private async Task TempRollback(Message message)
     {
-        if (message.MessageType != MessageType.HotelRequest || message.Body == null) return;
-        var requestBody = (HotelRequest)message.Body;
-        
         await _dbReadLock.WaitAsync(Token);
         await using var transaction = await _readDb.Database.BeginTransactionAsync(Token);
 
@@ -222,9 +219,6 @@ public class HotelHandler
     
     private async Task BookHotel(Message message)
     {
-        if (message.MessageType != MessageType.HotelRequest || message.Body == null) return;
-        var requestBody = (HotelRequest)message.Body;
-        
         await _dbReadLock.WaitAsync(Token);
         await using var transaction = await _readDb.Database.BeginTransactionAsync(Token);
 
