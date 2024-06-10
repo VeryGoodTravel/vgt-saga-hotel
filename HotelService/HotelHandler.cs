@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using NLog;
 using vgt_saga_hotel.Models;
 using vgt_saga_serialization;
@@ -133,8 +134,8 @@ public class HotelHandler
                 BookFrom = requestBody.BookFrom.Value,
                 BookTo = requestBody.BookTo.Value
             });
-            await _readDb.SaveChangesAsync(Token);
             await transaction.CommitAsync(Token);
+            await _readDb.SaveChangesAsync(Token);
 
             message.MessageId += 1;
             message.MessageType = MessageType.PaymentRequest;
@@ -177,8 +178,9 @@ public class HotelHandler
             BookFrom = requestBody.BookFrom.Value,
             BookTo = requestBody.BookTo.Value
         });
-        await _readDb.SaveChangesAsync(Token);
         await transaction.CommitAsync(Token);
+        await _readDb.SaveChangesAsync(Token);
+        
         
         message.MessageId += 1;
         message.MessageType = MessageType.PaymentRequest;
@@ -203,8 +205,9 @@ public class HotelHandler
         {
             await booked.ExecuteDeleteAsync(Token);
         }
-        await _readDb.SaveChangesAsync(Token);
         await transaction.CommitAsync(Token);
+        await _readDb.SaveChangesAsync(Token);
+       
         
         message.MessageType = MessageType.OrderReply;
         message.MessageId += 1;
@@ -219,40 +222,49 @@ public class HotelHandler
     
     private async Task BookHotel(Message message)
     {
+        _logger.Debug("Running BookHotel");
         await _dbReadLock.WaitAsync(Token);
         await using var transaction = await _readDb.Database.BeginTransactionAsync(Token);
 
-        var booked = _readDb.Bookings
-            .Where(p => p.TransactionId == message.TransactionId);
-
-        if (booked.Any())
-        {
-            var booking = booked.FirstOrDefault();
-            if (booking != null)
-            {
-                booking.Temporary = 0;
-                await _readDb.SaveChangesAsync(Token);
-                await transaction.CommitAsync(Token);
-                
-                message.MessageType = MessageType.OrderReply;
-                message.MessageId += 1;
-                message.State = SagaState.HotelFullAccept;
-                message.Body = new HotelReply();
-                message.CreationDate = DateTime.Now;
+        _logger.Debug("Started transaction");
         
-                await Publish.Writer.WriteAsync(message, Token);
-                _dbReadLock.Release();
-                _concurencySemaphore.Release();
-            }
+        var booking = await _readDb.Bookings
+            .FirstOrDefaultAsync(p => p.TransactionId == message.TransactionId);
+
+        _logger.Debug("Received booking from db {d}", JsonConvert.SerializeObject(booking));
+        
+        if (booking != null)
+        {
+            _logger.Debug("Changing temporary status");
+            booking.Temporary = 0;
+            await transaction.CommitAsync(Token);
+            await _readDb.SaveChangesAsync(Token);
+            
+                
+            _logger.Debug("Creating positive response");
+            message.MessageType = MessageType.OrderReply;
+            message.MessageId += 1;
+            message.State = SagaState.HotelFullAccept;
+            message.Body = new HotelReply();
+            message.CreationDate = DateTime.Now;
+        
+            _logger.Debug("Routing positive response {m}", JsonConvert.SerializeObject(message));
+            await Publish.Writer.WriteAsync(message, Token);
+            _dbReadLock.Release();
+            _concurencySemaphore.Release();
         }
+        
+        _logger.Debug("Transaction rollback");
         await transaction.RollbackAsync(Token);
         
+        _logger.Debug("Creating Fail request");
         message.MessageType = MessageType.OrderReply;
         message.MessageId += 1;
         message.State = SagaState.HotelFullFail;
         message.Body = new HotelReply();
         message.CreationDate = DateTime.Now;
         
+        _logger.Debug("Routing positive response {m}", JsonConvert.SerializeObject(message));
         await Publish.Writer.WriteAsync(message, Token);
         _dbReadLock.Release();
         _concurencySemaphore.Release();
