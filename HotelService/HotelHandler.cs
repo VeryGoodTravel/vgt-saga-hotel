@@ -135,7 +135,7 @@ public class HotelHandler
                 BookTo = requestBody.BookTo.Value
             });
             await transaction.CommitAsync(Token);
-            await _readDb.SaveChangesAsync(Token);
+            await _writeDb.SaveChangesAsync(Token);
 
             message.MessageId += 1;
             message.MessageType = MessageType.PaymentRequest;
@@ -179,7 +179,7 @@ public class HotelHandler
             BookTo = requestBody.BookTo.Value
         });
         await transaction.CommitAsync(Token);
-        await _readDb.SaveChangesAsync(Token);
+        await _writeDb.SaveChangesAsync(Token);
         
         
         message.MessageId += 1;
