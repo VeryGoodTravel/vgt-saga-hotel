@@ -72,6 +72,8 @@ public class HotelHandler
         {
             var message = await Requests.Reader.ReadAsync(Token);
 
+            _logger.Info("HandleHotels received saga {s} message to route {r}", message.State.ToString(), message);
+            
             await _concurencySemaphore.WaitAsync(Token);
 
             _ = message.State switch
