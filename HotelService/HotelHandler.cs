@@ -72,7 +72,7 @@ public class HotelHandler
         {
             var message = await Requests.Reader.ReadAsync(Token);
 
-            _logger.Info("HandleHotels received saga {s} message to route {r}", message.State.ToString(), message);
+            _logger.Info("HandleHotels received Handling message {id} {type} {state}", message.MessageId, message.MessageType, message.State.ToString());
             
             await _concurencySemaphore.WaitAsync(Token);
 
@@ -214,7 +214,7 @@ public class HotelHandler
         message.MessageType = MessageType.OrderReply;
         message.MessageId += 1;
         message.State = SagaState.HotelTimedRollback;
-        message.Body = new HotelReply();
+        message.Body = new OrderReply();
         message.CreationDate = DateTime.Now;
         
         await Publish.Writer.WriteAsync(message, Token);
