@@ -197,26 +197,30 @@ public class HotelHandler
     
     private async Task TempRollback(Message message)
     {
+        _logger.Debug("TempRollback");
         await _dbReadLock.WaitAsync(Token);
         await using var transaction = await _readDb.Database.BeginTransactionAsync(Token);
 
         var booked = _readDb.Bookings
             .Where(p => p.TransactionId == message.TransactionId);
 
+        _logger.Info("BOOOOOOKEEED {b}", booked);
         if (booked.Any())
         {
+            _logger.Debug("removing booked");
             await booked.ExecuteDeleteAsync(Token);
         }
         await transaction.CommitAsync(Token);
         await _readDb.SaveChangesAsync(Token);
        
-        
+        _logger.Debug("creating response");
         message.MessageType = MessageType.OrderReply;
         message.MessageId += 1;
         message.State = SagaState.HotelTimedRollback;
         message.Body = new OrderReply();
         message.CreationDate = DateTime.Now;
         
+        _logger.Debug("to publisher");
         await Publish.Writer.WriteAsync(message, Token);
         _dbReadLock.Release();
         _concurencySemaphore.Release();
