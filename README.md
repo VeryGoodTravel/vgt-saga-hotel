@@ -26,7 +26,7 @@ To update those submodules in the local branch run:
 - RABBIT_PASSWORD -> User password to log in with.
 - RABBIT_REPLIES -> Queue of the replies sent back to the orchestrator.
 - RABBIT_HOTEL -> Queue of the requests sent by the orchestrator to the hotel service.
-- DB_SERVER -> Database server name to use
+- DB_SERVER -> Database server name to use.
 - DB_NAME_HOTEL -> Database name to use for the hotel service
 - DB_PASSWORD -> Database password to use for the database server
 - DB_USER -> Username to use on db server connection
