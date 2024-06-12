@@ -80,7 +80,7 @@ public class HotelHandler
             {
                 SagaState.Begin => Task.Run(() => TempBookHotel(message), Token),
                 SagaState.PaymentAccept => Task.Run(() => BookHotel(message), Token),
-                SagaState.HotelTimedRollback => Task.Run(() => TempRollback(message), Token),
+                SagaState.HotelTimedRollback or SagaState.PaymentFailed => Task.Run(() => TempRollback(message), Token),
                 _ => null
             };
         }
