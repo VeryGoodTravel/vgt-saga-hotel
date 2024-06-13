@@ -109,19 +109,19 @@ app.MapPost("/hotels", ([FromBody]HotelsRequest request) =>
                   && rooms.Max10yo >= request.Participants[2]
                   && rooms.MaxLesserChildren >= request.Participants[1]
                   && (request.Cities.Any(p => p.Equals(rooms.Hotel.City)))
-                  && (from m in db.Bookings 
+                  && ((from m in db.Bookings 
                       where ((m.BookFrom < request.Dates.EndDt()
                             && m.BookFrom > request.Dates.StartDt()
                             || m.BookTo > request.Dates.StartDt()
                             && m.BookTo < request.Dates.EndDt())
                             && m.Room == rooms) 
-                      select m) == null || (from m in db.Bookings 
+                      select m).AsEnumerable() == null || (from m in db.Bookings 
                       where ((m.BookFrom < request.Dates.EndDt()
                               && m.BookFrom > request.Dates.StartDt()
                               || m.BookTo > request.Dates.StartDt()
                               && m.BookTo < request.Dates.EndDt())
                              && m.Room == rooms) 
-                      select m).Count() < rooms.Amount
+                      select m).AsEnumerable().Count() < rooms.Amount)
             select rooms;
             
 
