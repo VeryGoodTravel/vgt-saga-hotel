@@ -120,8 +120,11 @@ public class HotelHandler
             .Include(p => p.Hotel)
             .Where(p => p.Room == room
                    && p.Hotel == hotel
-                   && p.BookFrom < requestBody.BookTo
-                   && p.BookTo > requestBody.BookFrom);
+                   && 
+                   (p.BookFrom < requestBody.BookTo
+                    && p.BookFrom > requestBody.BookFrom
+                    || p.BookTo > requestBody.BookFrom
+                    && p.BookTo < requestBody.BookTo));
         var count = booked.Count();
 
         if (count < room.Amount)
@@ -169,7 +172,7 @@ public class HotelHandler
             return;
         }
 
-        await temporary.ExecuteDeleteAsync(Token);
+        _logger.Info("Deleted hotel temporary bookings count {c}", await temporary.ExecuteDeleteAsync(Token));
         _writeDb.Bookings.Add(new Booking
         {
             Hotel = hotel,
@@ -208,7 +211,7 @@ public class HotelHandler
         if (booked.Any())
         {
             _logger.Debug("removing booked");
-            await booked.ExecuteDeleteAsync(Token);
+           _logger.Info("Deleted hotel bookings count {c}", await booked.ExecuteDeleteAsync(Token));
         }
         await transaction.CommitAsync(Token);
         await _readDb.SaveChangesAsync(Token);
