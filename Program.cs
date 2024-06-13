@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Extensions.Logging;
+using NLog.Fluent;
 using RabbitMQ.Client.Exceptions;
 using vgt_saga_hotel;
 using vgt_saga_hotel.HotelService;
@@ -109,30 +110,39 @@ app.MapPost("/hotels", ([FromBody]HotelsRequest request) =>
                   && rooms.MaxLesserChildren >= request.Participants[1]
                   && (request.Cities.Any(p => p.Equals(rooms.Hotel.City)))
                   && (from m in db.Bookings 
-                      where (m.BookFrom < request.Dates.EndDt()
+                      where ((m.BookFrom < request.Dates.EndDt()
                             && m.BookFrom > request.Dates.StartDt()
                             || m.BookTo > request.Dates.StartDt()
                             && m.BookTo < request.Dates.EndDt())
-                            && m.Room == rooms select m).Count() < rooms.Amount
+                            && m.Room == rooms) 
+                      select m) == null || (from m in db.Bookings 
+                      where ((m.BookFrom < request.Dates.EndDt()
+                              && m.BookFrom > request.Dates.StartDt()
+                              || m.BookTo > request.Dates.StartDt()
+                              && m.BookTo < request.Dates.EndDt())
+                             && m.Room == rooms) 
+                      select m).Count() < rooms.Amount
             select rooms;
             
 
         var Dbhotels = new Dictionary<HotelDb, List<RoomDb>>();
 
+        logger.Info("-----------EXECUTING QUERY");
+
         var results = dbRooms.Include(p => p.Hotel).AsSplitQuery().AsNoTracking().Distinct().ToList();
-        logger.Info("-------------------------------------- Found rooms count {room} \r\nrooms: {r}",  results.Count, JsonConvert.SerializeObject(results));
+        logger.Info("-------------------------------------- Found rooms count {room}",  results.Count);
         
-        var dbRooms2 = from rooms in db.Rooms
-            where rooms.MaxAdults >= request.Participants[4]
-                  && rooms.MinAdults <= request.Participants[4]
-                  && rooms.MaxChildren >= request.Participants[3]
-                  && rooms.MinChildren <= request.Participants[3]
-                  && rooms.Max10yo >= request.Participants[2]
-                  && rooms.MaxLesserChildren >= request.Participants[1]
-                  && (request.Cities.Any(p => p.Equals(rooms.Hotel.City)))
-            select rooms;
-        var results2 = dbRooms2.Include(p => p.Hotel).AsSplitQuery().AsNoTracking().Distinct().ToList();
-        logger.Info("-------------------------------------- Found rooms without booking check count {room} \r\nrooms: {r}",  results2.Count, JsonConvert.SerializeObject(results2));
+        // var dbRooms2 = from rooms in db.Rooms
+        //     where rooms.MaxAdults >= request.Participants[4]
+        //           && rooms.MinAdults <= request.Participants[4]
+        //           && rooms.MaxChildren >= request.Participants[3]
+        //           && rooms.MinChildren <= request.Participants[3]
+        //           && rooms.Max10yo >= request.Participants[2]
+        //           && rooms.MaxLesserChildren >= request.Participants[1]
+        //           && (request.Cities.Any(p => p.Equals(rooms.Hotel.City)))
+        //     select rooms;
+        // var results2 = dbRooms2.Include(p => p.Hotel).AsSplitQuery().AsNoTracking().Distinct().ToList();
+        // logger.Info("-------------------------------------- Found rooms without booking check count {room} \r\nrooms: {r}",  results2.Count, JsonConvert.SerializeObject(results2));
         
         var hotelIds = results.Select(p => p.Hotel.HotelDbId).Distinct().ToList();
         
