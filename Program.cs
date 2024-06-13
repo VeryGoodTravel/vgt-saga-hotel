@@ -102,7 +102,8 @@ app.MapPost("/hotels", ([FromBody]HotelsRequest request) =>
         logger.Info("-------Request: \r\n {room}",  JsonConvert.SerializeObject(request));
         
 
-        var dbRooms = from rooms in db.Rooms
+        logger.Info("-----------EXECUTING QUERY");
+        var dbRooms = (from rooms in db.Rooms
             where rooms.MaxAdults >= request.Participants[4]
                   && rooms.MinAdults <= request.Participants[4]
                   && rooms.MaxChildren >= request.Participants[3]
@@ -123,14 +124,48 @@ app.MapPost("/hotels", ([FromBody]HotelsRequest request) =>
                   //             && m.BookTo < request.Dates.EndDt())
                   //            && m.Room == rooms) 
                   //     select m).AsEnumerable().Count() < rooms.Amount)
-            select rooms;
-            
+            select rooms).Include(p => p.Hotel).AsSplitQuery().AsNoTracking().Distinct().ToList();
+        
+        logger.Info("-----------Found {f} dbRooms before bookings", dbRooms.Count);
+
+        logger.Info("-----------EXECUTING QUERY2");
+        var dbBookings = (from bookings in db.Bookings
+            where bookings.BookFrom < request.Dates.EndDt()
+                  && bookings.BookFrom > request.Dates.StartDt()
+                  || bookings.BookTo > request.Dates.StartDt()
+                  && bookings.BookTo < request.Dates.EndDt()
+            select bookings).ToList();
+
+        Dictionary<RoomDb, int> booked = []; 
+        
+        foreach (var dbBooking in dbBookings.Where(dbBooking => !booked.TryAdd(dbBooking.Room, 1)))
+        {
+            booked[dbBooking.Room] += 1;
+        }
+        
+        logger.Info("-----------Found {f} bookings", dbBookings.Count);
+        
+        List<RoomDb> results = [];
+
+        foreach (var dbRoom in dbRooms)
+        {
+            if (booked.TryGetValue(dbRoom, out var cnt))
+            {
+                if (dbRoom.Amount > cnt)
+                {
+                    results.Add(dbRoom);
+                }
+            }
+            else
+            {
+                results.Add(dbRoom);
+            }
+        }
+        
+        logger.Info("-----------Found {f} rooms after bookings", results.Count);
 
         var Dbhotels = new Dictionary<HotelDb, List<RoomDb>>();
-
-        logger.Info("-----------EXECUTING QUERY");
-
-        var results = dbRooms.Include(p => p.Hotel).AsSplitQuery().AsNoTracking().Distinct().ToList();
+        
         logger.Info("-------------------------------------- Found rooms count {room}",  results.Count);
         
         // var dbRooms2 = from rooms in db.Rooms
