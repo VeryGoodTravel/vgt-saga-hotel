@@ -113,7 +113,7 @@ app.MapPost("/hotels", ([FromBody]HotelsRequest request) =>
                             && m.BookFrom > request.Dates.StartDt()
                             || m.BookTo > request.Dates.StartDt()
                             && m.BookTo < request.Dates.EndDt())
-                            && m.Room == rooms select m).AsNoTracking().ToList().Count() < rooms.Amount
+                            && m.Room == rooms select m).Count() < rooms.Amount
             select rooms;
             
 
