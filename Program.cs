@@ -99,7 +99,8 @@ app.MapPost("/hotels", ([FromBody]HotelsRequest request) =>
         using var scope = app.Services.CreateAsyncScope();
         using var db = scope.ServiceProvider.GetService<HotelDbContext>();
 
-        logger.Info("Cities: {room}",  request.Cities);
+        logger.Info("-------Request: \r\n {room}",  JsonConvert.SerializeObject(request));
+        
 
         var dbRooms = from rooms in db.Rooms
             where rooms.MaxAdults >= request.Participants[4]
